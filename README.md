@@ -1,3 +1,3 @@
 # tuck-shop
-# working tuck shop program
-# by Destiny, Heesu, Rachel
+working tuck shop program
+by Destiny, Heesu, Rachel
