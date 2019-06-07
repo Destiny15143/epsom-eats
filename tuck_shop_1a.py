@@ -1,3 +1,4 @@
+# epsom_eats_1a
 # puts csv file into class
 # assigns headings as each food's attributes
 # their food name is assumed to be unique so will serve as their ID 
