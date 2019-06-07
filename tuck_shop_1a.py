@@ -6,7 +6,7 @@ import csv
 
 class Food:
     def __init__(self, row, header):
-        self.__dict__ = dict(zip(header, row)) #initiates each row as an instance and headings as their attributes
+        self.__dict__ = dict(zip(header, row)) #initiates each row as an instance and headings as their attributes (from https://stackoverflow.com/questions/47445586/how-to-read-the-contents-of-a-csv-file-into-a-class-with-each-csv-row-as-a-class)
     def find_food_name(i):
         return(foods[i].food_name) #access food name from instance (testing purposes)
 
