@@ -1,5 +1,5 @@
-# pre order ask for input
-# link to component 1 (start screen)
+# finish/cancel buttons
+# title
 
 from tkinter import *
 from tkinter import ttk
@@ -48,24 +48,38 @@ class Food:
         return chilled_food_names, hot_food_names, treats_food_names
 
 class pageGrid:
-    def __init__(self, master):
-        self.frame_header = ttk.Frame(master)
+    def __init__(self, parent):
+        self.frame_header = ttk.Frame(parent)
         self.frame_header.pack()
+        self.body = ttk.Frame(parent)
+        self.body.pack()
 
-        ttk.Label(self.frame_header, text = "Title goes here").grid(row = 0, column = 0)
+        ttk.Label(self.frame_header, text = "Epsom Eats", font=('verdana', 20)).grid(row = 0, column = 1)
+        ttk.Label(self.frame_header, text = "Please select the item to order", font=('verdana', 10)).grid(row = 2, column = 1)
+        ttk.Button(self.frame_header, text = "FINISH", width = 20, command = orderConfirm).grid(row = 2, column = 2, sticky = W, padx = 100, ipadx = 10, pady = 10)
+        ttk.Button(self.frame_header, text = "CANCEL", width = 20, command = self.restart).grid(row = 2, column = 0, sticky = E, padx = 100, ipadx = 10, pady = 10)
 
         # places category frames in window
-        self.chilled_content = ttk.Frame(master)
-        self.chilled_content.pack(side = LEFT, anchor = "n", expand = YES)
-        self.hot_content = ttk.Frame(master)
-        self.hot_content.pack(side = LEFT, anchor = "n", expand = YES)
-        self.treats_content = ttk.Frame(master)
-        self.treats_content.pack(side = LEFT, anchor = "n", expand = YES)
+        self.chilled_content = ttk.Frame(self.body)
+        self.chilled_content.pack(side = LEFT, anchor = "n", padx = 20)
+        self.hot_content = ttk.Frame(self.body)
+        self.hot_content.pack(side = LEFT, anchor = "n", padx = 20)
+        self.treats_content = ttk.Frame(self.body)
+        self.treats_content.pack(side = LEFT, anchor = "n", padx = 20)
 
         # places button groups in their respective categories
         buttonGrid(self.chilled_content, chilled_button_string)
         buttonGrid(self.hot_content, hot_button_string)
         buttonGrid(self.treats_content, treats_button_string)
+
+    def restart(self):
+        self.frame_header.forget()
+        self.body.forget()
+        start_screen()
+        
+class orderConfirm:
+    def __init__(self, parent):
+        pass 
 
 class preorderDialogue:
     def __init__(self, parent):
@@ -78,7 +92,8 @@ class preorderDialogue:
         self.prompt = Label(top, text = "Enter your student ID below").grid(row = 0, column = 0, columnspan = 4, pady = 30, padx = 37.5)
         self.entry_field = Entry(top)        
         self.entry_field.grid(row = 1, column = 0, columnspan = 4, padx = 37.5)
-        self.place_holder = Label(self.top).grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5) # place holder for error message text 
+        # place holder for error message text 
+        self.place_holder = Label(self.top).grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5) 
         self.top.resizable(0,0)
 
         ok = ttk.Button(top, text = "Ok", command = self.ok)
@@ -99,7 +114,8 @@ class preorderDialogue:
                 self.top.destroy()
                 valid = True
             else:
-                self.entry_field.delete(0, 'end') # clear input field
+                # clear input field
+                self.entry_field.delete(0, 'end') 
                 self.error_msg = Label(self.top, text = "Please enter a valid student ID").grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5)
                 root.after(1000, update_buttons)
 
@@ -109,13 +125,13 @@ class preorderDialogue:
             root.after(1000, update_buttons)
 
     def cancel(self):
-        self.top.destroy()
 
+        self.top.destroy()
 
 # places a category of buttons
 class buttonGrid():
 
-    def __init__(self, master, food_names): 
+    def __init__(self, parent, food_names): 
         
         num_rows = self.calculate_rows(food_names)
         NUM_COLS = 2
@@ -128,7 +144,7 @@ class buttonGrid():
                     # prepares food name and price in a tidy format 
                     output = "{} \n${:.2f}".format(food_name[0], float(food_name[1]))
                     # partial code module from https://stackoverflow.com/questions/6920302/how-to-pass-arguments-to-a-button-command-in-tkinter/22290388
-                    buttons.append(ttk.Button(master, text = output, width = 20, command = partial(quantity_selection, food_name[0])))
+                    buttons.append(ttk.Button(parent, text = output, width = 20, command = partial(quantity_selection, food_name[0])))
                     buttons[count].grid(row = r, column = c)
                     count += 1
                 
@@ -156,7 +172,7 @@ class buttonGrid():
 def quantity_selection(food_name): 
     print(food_name)
 
-def start_screen():
+def live_time():
     # keeps time ticking
     global time1
     time1 = ''
@@ -164,23 +180,6 @@ def start_screen():
     clock = Label(root)
     clock.pack(anchor = "nw", padx = 10, pady = 10)
     tick()
-    global title
-    title = ttk.Label(root, text = "Epsom Eats", font=('verdana', 50))
-    global preorder_button
-    preorder_button = ttk.Button(root, text = "Pre Order", state = check_preorder_time(), command = partial(preorder))
-    global start_button
-    start_button = ttk.Button(root, text = "Start Order", state = check_startorder_time(), command = partial(start_menu))
-    preorder_button.pack(side = BOTTOM, pady = 50)
-    start_button.pack(side = BOTTOM, pady = 10)
-    title.pack(expand=YES)
-    update_buttons()
-
-def update_buttons():
-    preorder_button.config(state = check_preorder_time())
-    preorder_button.update()
-    start_button.config(state = check_startorder_time())
-    start_button.update()
-    root.after(1000, update_buttons)
 
 # clock code below modified from https://stackoverflow.com/questions/15689667/digital-clock-in-status-bar-in-python-3-and-tkinter
 def tick():
@@ -191,12 +190,32 @@ def tick():
     if time2 != time1:
         time1 = time2
         clock.config(text=time2)
-    # calls itself every 200 milliseconds
-    # to update the time display as needed
+    # calls itself to update the time display as needed
     clock.after(1000, tick)
+
+def start_screen():
+    global title
+    title = ttk.Label(root, text = "Epsom Eats", font=('verdana', 50))
+    global preorder_button
+    preorder_button = ttk.Button(root, text = "Pre Order", state = check_preorder_time(), command = partial(preorder))
+    global start_button
     
+    start_button = ttk.Button(root, text = "Start Order", state = check_startorder_time(), command = partial(start_menu))
+    preorder_button.pack(side = BOTTOM, pady = 50)
+    start_button.pack(side = BOTTOM, pady = 10)
+    title.pack(expand = YES)
+        
+    update_buttons()
+
+def update_buttons():
+    preorder_button.config(state = check_preorder_time())
+    preorder_button.update()
+    start_button.config(state = check_startorder_time())
+    start_button.update()
+    root.after(1000, update_buttons)
+
 def check_preorder_time():
-    deadlines = [1225, 1225, 1235, 1225, 1250]
+    deadlines = [2359, 2359, 2359, 2359, 2359, 2359, 2359]
     deadline = deadlines[datetime.datetime.today().weekday()] # finds day of the week as index
     if int(time.strftime('%H%M')) >= deadline:
         return "disabled"
@@ -204,7 +223,7 @@ def check_preorder_time():
         return "enabled"
 
 def check_startorder_time():
-    deadlines = [1255, 1255, 1305, 1255, 1245]
+    deadlines = [2359, 2359, 2359, 2359, 2359, 2359, 2359]
     deadline = deadlines[datetime.datetime.today().weekday()] # finds day of the week as index
     if int(time.strftime('%H%M')) >= deadline:
         return "disabled"
@@ -217,9 +236,10 @@ def preorder():
     
 def start_menu():
     page_grid = pageGrid(root)
-    preorder_button.forget()
-    start_button.forget()
-    title.forget()
+    # remove not needed start screen widgets 
+    preorder_button.pack_forget()
+    start_button.pack_forget()
+    title.pack_forget()
 
 def center_window(window_width, window_height):
 
@@ -249,6 +269,8 @@ if __name__ == "__main__":
     treats_button_string = buttonGrid.food_name_price(Food.categorise()[2])
 
     # places start screen contents
-    start_screen = start_screen()
+    live_time = live_time()
+    start = start_screen()
+    
     root.mainloop()
     
