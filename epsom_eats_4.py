@@ -1,5 +1,6 @@
-# finish/cancel buttons
-# title
+# implement quantity selection
+# added category headings
+# (organise code)
 
 from tkinter import *
 from tkinter import ttk
@@ -21,7 +22,7 @@ class Food:
     def find_price(i):
         return(foods[i].price)
     def find_description(i):
-        return(foods[i].category)
+        return(foods[i].description)
 
     # find index of food based on food name 
     def find_index(i):
@@ -50,22 +51,28 @@ class Food:
 class pageGrid:
     def __init__(self, parent):
         self.frame_header = ttk.Frame(parent)
-        self.frame_header.pack()
+        self.frame_header.grid()
         self.body = ttk.Frame(parent)
-        self.body.pack()
+        self.body.grid()
 
         ttk.Label(self.frame_header, text = "Epsom Eats", font=('verdana', 20)).grid(row = 0, column = 1)
         ttk.Label(self.frame_header, text = "Please select the item to order", font=('verdana', 10)).grid(row = 2, column = 1)
-        ttk.Button(self.frame_header, text = "FINISH", width = 20, command = orderConfirm).grid(row = 2, column = 2, sticky = W, padx = 100, ipadx = 10, pady = 10)
-        ttk.Button(self.frame_header, text = "CANCEL", width = 20, command = self.restart).grid(row = 2, column = 0, sticky = E, padx = 100, ipadx = 10, pady = 10)
+        ttk.Button(self.frame_header, text = "FINISH", width = 20, command = orderConfirm).grid(row = 2, column = 2, sticky = W, padx = 100, ipadx = 10, pady = 5)
+        ttk.Button(self.frame_header, text = "CANCEL", width = 20, command = self.restart).grid(row = 2, column = 0, sticky = E, padx = 100, ipadx = 10, pady = 5)
 
+        # place category headings
+
+        ttk.Label(self.body, text = "CHILLED", font=('verdana', 10, 'bold')).grid(row = 0, column = 0)
+        ttk.Label(self.body, text = "HOT", font=('verdana', 10, 'bold')).grid(row = 0, column = 1)
+        ttk.Label(self.body, text = "TREATS", font=('verdana', 10, 'bold')).grid(row = 0, column = 2)
+        
         # places category frames in window
         self.chilled_content = ttk.Frame(self.body)
-        self.chilled_content.pack(side = LEFT, anchor = "n", padx = 20)
+        self.chilled_content.grid(row = 1, column = 0, padx = 20, sticky = NW)
         self.hot_content = ttk.Frame(self.body)
-        self.hot_content.pack(side = LEFT, anchor = "n", padx = 20)
+        self.hot_content.grid(row = 1, column = 1, padx = 20, sticky = NW)
         self.treats_content = ttk.Frame(self.body)
-        self.treats_content.pack(side = LEFT, anchor = "n", padx = 20)
+        self.treats_content.grid(row = 1, column = 2, padx = 20, sticky = NW)
 
         # places button groups in their respective categories
         buttonGrid(self.chilled_content, chilled_button_string)
@@ -73,8 +80,8 @@ class pageGrid:
         buttonGrid(self.treats_content, treats_button_string)
 
     def restart(self):
-        self.frame_header.forget()
-        self.body.forget()
+        self.frame_header.grid_forget()
+        self.body.grid_forget()
         start_screen()
         
 class orderConfirm:
@@ -83,27 +90,23 @@ class orderConfirm:
 
 class preorderDialogue:
     def __init__(self, parent):
-        
-        top = self.top = Toplevel(parent)
-        top.attributes("-topmost", True) #stays on top
+
+        self.top = Toplevel(parent)
+        self.top.attributes("-topmost", True) #stays on top
         coord = center_window(300, 200)
-        top.geometry("300x200+{}+{}".format(str(coord[0]), str(coord[1])))        
-        
-        self.prompt = Label(top, text = "Enter your student ID below").grid(row = 0, column = 0, columnspan = 4, pady = 30, padx = 37.5)
-        self.entry_field = Entry(top)        
-        self.entry_field.grid(row = 1, column = 0, columnspan = 4, padx = 37.5)
-        # place holder for error message text 
-        self.place_holder = Label(self.top).grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5) 
+        self.top.geometry("300x200+{}+{}".format(str(coord[0]), str(coord[1])))
         self.top.resizable(0,0)
 
-        ok = ttk.Button(top, text = "Ok", command = self.ok)
-        ok.grid(row = 3, column = 0, columnspan = 2, pady = 20, padx = 37.5)
-        cancel = ttk.Button(top, text = "Cancel", command = self.cancel)
-        cancel.grid(row = 3, column = 2, columnspan = 2, pady = 20, padx = 37.5)
+        self.top.title("Pre Order")
+        self.prompt = Label(self.top, text = "Enter your student ID below").grid(row = 0, column = 0, columnspan = 4, pady = 30, padx = 37.5)
+        self.entry_field = Entry(self.top)
+        self.grid(row = 1, column = 0, columnspan = 4, padx = 37.5)
+        # place holder for error message text 
+        self.place_holder = Label(self.top).grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5) 
+        ttk.Button(self.top, text = "Ok", command = self.ok).grid(row = 3, column = 0, columnspan = 2, pady = 20, padx = 37.5)
+        ttk.Button(self.top, text = "Cancel", command = self.cancel).grid(row = 3, column = 2, columnspan = 2, pady = 20, padx = 37.5)
 
     def ok(self):
-        valid = False
-
 
         # checks for valid input
         try: 
@@ -112,7 +115,6 @@ class preorderDialogue:
             if 15000 <= preorder_id <= 19999:
                 start_menu()
                 self.top.destroy()
-                valid = True
             else:
                 # clear input field
                 self.entry_field.delete(0, 'end') 
@@ -144,7 +146,7 @@ class buttonGrid():
                     # prepares food name and price in a tidy format 
                     output = "{} \n${:.2f}".format(food_name[0], float(food_name[1]))
                     # partial code module from https://stackoverflow.com/questions/6920302/how-to-pass-arguments-to-a-button-command-in-tkinter/22290388
-                    buttons.append(ttk.Button(parent, text = output, width = 20, command = partial(quantity_selection, food_name[0])))
+                    buttons.append(ttk.Button(parent, text = output, width = 20, command = partial(quantityDialogue, root, food_name[0])))
                     buttons[count].grid(row = r, column = c)
                     count += 1
                 
@@ -169,8 +171,85 @@ class buttonGrid():
         return return_string
 
 # will be combined with quantity selection pop up component later 
-def quantity_selection(food_name): 
-    print(food_name)
+class quantityDialogue(): 
+
+    def __init__(self, parent, food_name):
+        
+        self.top = Toplevel(parent)
+        self.top.attributes("-topmost", True) #stays on top
+        coord = center_window(300, 200)
+        self.top.geometry("300x200+{}+{}".format(str(coord[0]), str(coord[1])))
+        self.top.title("Quantity Selection")
+        self.food_name = food_name
+        self.price = self.food_name_price_des(food_name)[1]
+        self.description = self.food_name_price_des(food_name)[2]
+        self.option = IntVar(value=0) #default option is 0
+        self.options = [0, 0, 1, 2, 3, 4, 5]
+
+        # set default to current quantity if already in cart
+        for item in orders:
+            if item[0] == self.food_name:
+                self.option = IntVar(value=item[2])
+        
+        Label(self.top, text = "{} - ${:.2f} \n {}".format(food_name, float(self.price), self.description)).grid(row = 0, column = 0, columnspan = 4, pady = 20, padx = 37.5)
+        Label(self.top, text = "Quantity").grid(row = 1, column = 0, padx = 50)
+        self.dropdown = ttk.OptionMenu(self.top, self.option, *self.options)
+        self.dropdown.grid(row = 1, column = 1, columnspan = 2, padx = 50)
+        # place holder for error message text 
+        self.place_holder = Label(self.top).grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5) 
+        self.top.resizable(0,0)
+
+        ok_button = ttk.Button(self.top, text = "Ok", command = partial(self.ok, orders))
+        ok_button.grid(row = 3, column = 0, columnspan = 2, pady = 20, padx = 37.5)
+        cancel_button = ttk.Button(self.top, text = "Cancel", command = self.cancel)
+        cancel_button.grid(row = 3, column = 2, columnspan = 2, pady = 20, padx = 37.5)
+
+    # to find to information needed for the quantity selection dialogue 
+    def food_name_price_des(self, food_name):
+        return_string = []
+        # adds food name and its corresponding info into list 
+        return_string.append(food_name)
+        # finds corresponding index then other related information
+        return_string.append(Food.find_price(Food.find_index(food_name)))
+        return_string.append(Food.find_description(Food.find_index(food_name)))
+        return return_string
+
+
+    def ok(self, orders):
+        item_order = []
+        value = int(self.option.get())
+
+        # update quantity if it has already been added to cart (editing)
+        for item in orders:
+            if item[0] == self.food_name:
+                item[2] = value
+                if value == 0:
+                    orders.remove(item)
+                self.top.destroy()
+                print(orders)
+                return orders
+
+        # don't save an order of zero quantity 
+        if value == 0:
+            self.top.destroy()
+            print(orders)
+            return orders 
+        
+        if len(orders) <= 2:
+            item_order.append(self.food_name)
+            item_order.append(self.price)
+            item_order.append(value)
+            item_order.append(round(value*float(self.price), 1))
+            orders.append(item_order)
+            self.top.destroy()
+            print(orders)
+            return orders
+        else:
+            self.error_msg = Label(self.top, text = "Limit of 3 types of food items per order").grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5)
+        
+    def cancel(self):
+        self.top.destroy()
+        
 
 def live_time():
     # keeps time ticking
@@ -178,7 +257,7 @@ def live_time():
     time1 = ''
     global clock
     clock = Label(root)
-    clock.pack(anchor = "nw", padx = 10, pady = 10)
+    clock.grid(row = 0, sticky = NW, padx = 10, pady = 5)
     tick()
 
 # clock code below modified from https://stackoverflow.com/questions/15689667/digital-clock-in-status-bar-in-python-3-and-tkinter
@@ -194,6 +273,8 @@ def tick():
     clock.after(1000, tick)
 
 def start_screen():
+    global orders
+    orders = []
     global title
     title = ttk.Label(root, text = "Epsom Eats", font=('verdana', 50))
     global preorder_button
@@ -201,9 +282,9 @@ def start_screen():
     global start_button
     
     start_button = ttk.Button(root, text = "Start Order", state = check_startorder_time(), command = partial(start_menu))
-    preorder_button.pack(side = BOTTOM, pady = 50)
-    start_button.pack(side = BOTTOM, pady = 10)
-    title.pack(expand = YES)
+    preorder_button.grid(row = 3, padx = 300, pady = 20)
+    start_button.grid(row = 2, padx = 300)
+    title.grid(row = 1, padx = 300, pady = 200)
         
     update_buttons()
 
@@ -237,9 +318,9 @@ def preorder():
 def start_menu():
     page_grid = pageGrid(root)
     # remove not needed start screen widgets 
-    preorder_button.pack_forget()
-    start_button.pack_forget()
-    title.pack_forget()
+    preorder_button.grid_forget()
+    start_button.grid_forget()
+    title.grid_forget()
 
 def center_window(window_width, window_height):
 
@@ -254,8 +335,8 @@ if __name__ == "__main__":
 
     root = Tk()
     root.overrideredirect(1) # clears min/max buttons, close buttons
-    coord = center_window(1000, 600)
-    root.geometry("1000x600+{}+{}".format(str(coord[0]), str(coord[1])))
+    coord = center_window(1000, 650)
+    root.geometry("1000x650+{}+{}".format(str(coord[0]), str(coord[1]-20))) 
     ttk.Style().configure("TButton", justify = "center")
 
     #opens menu file 
@@ -271,6 +352,6 @@ if __name__ == "__main__":
     # places start screen contents
     live_time = live_time()
     start = start_screen()
-    
+
     root.mainloop()
-    
+  
