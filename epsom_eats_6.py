@@ -1,13 +1,9 @@
-# order confirmation, payment, payment accepted and order number screens added
-# edit dropdown to greyed - disabled
+# implementation of sales summary update to csv
+# receipt printing to txt file (food name, quantity and preorder number)
 
-# TO DO: 
-
+# TO DO:
 # update pictures
 # colours, fonts etc
-
-# receipt printing to file (food name, quantity and preorder number)
-# stock update
 
 from tkinter import *
 from tkinter import ttk
@@ -80,7 +76,7 @@ class pageGrid:
         self.hot_content.grid(row = 1, column = 1, padx = 20, sticky = NW)
         self.treats_content = ttk.Frame(self.body)
         self.treats_content.grid(row = 1, column = 2, padx = 20, sticky = NW)
-
+        
         # places button groups in their respective categories
         buttonGrid(self.chilled_content, chilled_button_string)
         buttonGrid(self.hot_content, hot_button_string)
@@ -186,8 +182,17 @@ class paymentAccepted:
         self.paid_msg.destroy()
         self.tick_img.destroy()
 
-        order_num = Label(self.top, text = "Your order number is {}".format(find_order_num()))
-        order_num.grid(padx = 110)
+        order_num = find_order_num()
+
+        order_num_txt = Label(self.top, text = "Your order number is {}".format(order_num))
+        order_num_txt.grid(padx = 110)
+
+        for order in orders:
+            food_name = order[0]
+            quantity = order[2]
+            update_sales_count(food_name, quantity)
+
+        print_receipt(orders, order_num)
 
         # 5 second delay
         self.top.after(2000, self.finish)
@@ -465,6 +470,56 @@ def center_window(window_width, window_height):
     coord.append(pos_down)
     return coord
 
+# updates the sale count on csv file
+def update_sales_count(food_name, quantity):
+    with open('sales_summary.csv', 'r') as sales_read:
+        reader = csv.reader(sales_read)
+        output = []
+        for line in reader:
+            if line[0] == food_name:
+                line[1] = str(int(line[1])+ quantity)
+            output.append(line)
+
+    with open('sales_summary.csv', 'w', newline='') as sales_write:
+        writer = csv.writer(sales_write)
+        writer.writerows(output)
+
+def print_receipt(orders, order_num):
+    # set up file and insert headings
+    receipts = open("receipts.txt","a")
+    receipts.write(str("*****Order Number: {}*****\n \n".format(order_num)))
+    contents = []
+    headings = [change_length("Item", 25), change_length("Price ($)", 15), change_length("Quantity", 14), change_length("Total ($)", 11)]
+    contents.append(headings)
+    contents.append("")
+
+    # calculate totals 
+    total = 0
+    for i in range(len(orders)):
+        total += orders[i][3]
+
+    # format orders into rows 
+    for item in orders:
+        row = []
+        row.append(change_length("{}".format(item[0]), 25))
+        row.append(change_length("{:.2f}".format(float(item[1])), 15))
+        row.append(change_length("{}".format(item[2]), 14))
+        row.append(change_length("{:.2f}".format(item[3]), 11))
+        contents.append(row)
+        
+    for i in contents:
+        for x in i:
+            receipts.write(str(x)+"")
+        receipts.write("\n")
+    receipts.write("\nTotal to pay: ${:.2f} \n \n".format(total))
+
+    receipts.close()
+
+def change_length(cell_name, character_limit):
+
+    cell_name += (" " * (character_limit-len(cell_name)))  # to fill in the extra spaces 
+    return cell_name
+
 if __name__ == "__main__":
 
     root = Tk()
@@ -488,9 +543,29 @@ if __name__ == "__main__":
     order_count = 0
     global preorder_id
     preorder_id = 0
+
+    # clear contents from previous day
+    receipts = open("receipts.txt","w")
+    receipts.close()
+
+    # resets the amount sold back to zero for the new day (1 day starts when the program is run)
+    with open('sales_summary.csv','r') as sales_read: 
+        item_count = 0
+        RESET = 0
+        new_day = []
+        reader = csv.reader(sales_read)
+        next(reader)
+        for line in reader:
+            if line[1] != RESET:
+                line[1]= RESET
+            new_day.append(line)
+
+    # writes it into csv 
+    with open('sales_summary.csv', 'w', newline='') as sales_write:
+        writer = csv.writer(sales_write)
+        writer.writerows(new_day)
     
     live_time = live_time()
     start = start_screen()
 
     root.mainloop()
-    
