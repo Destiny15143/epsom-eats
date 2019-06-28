@@ -511,7 +511,7 @@ def print_receipt(orders, order_num):
         for x in i:
             receipts.write(str(x)+"")
         receipts.write("\n")
-    receipts.write("\nTotal to pay: ${:.2f} \n \n".format(total))
+    receipts.write("\nTotal paid: ${:.2f} \n \n".format(total))
 
     receipts.close()
 
