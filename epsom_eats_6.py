@@ -1,5 +1,6 @@
 # implementation of sales summary update to csv
 # receipt printing to txt file (food name, quantity and preorder number)
+# freeze underlying window when pop up appears to prevent invalid interaction
 
 # TO DO:
 # update pictures
@@ -91,6 +92,7 @@ class orderConfirm:
             return None
 
         self.top = Toplevel(parent)
+        self.top.grab_set()
         self.top.attributes("-topmost", True) #stays on top
         coord = center_window(350, 200)
         self.top.geometry("350x200+{}+{}".format(str(coord[0]), str(coord[1])))
@@ -132,6 +134,7 @@ class orderConfirm:
 class payment:
     def __init__(self, parent):
         self.top = Toplevel(parent)
+        self.top.grab_set()
         self.top.attributes("-topmost", True) #stays on top
         coord = center_window(350, 200)
         self.top.geometry("350x200+{}+{}".format(str(coord[0]), str(coord[1])))
@@ -162,6 +165,7 @@ class payment:
 class paymentAccepted:
     def __init__(self, parent):
         self.top = Toplevel(parent)
+        self.top.grab_set()
         self.top.attributes("-topmost", True) #stays on top
         coord = center_window(350, 200)
         self.top.geometry("350x200+{}+{}".format(str(coord[0]), str(coord[1])))
@@ -206,6 +210,7 @@ class preorderDialogue:
     def __init__(self, parent):
 
         self.top = Toplevel(parent)
+        self.top.grab_set()
         self.top.attributes("-topmost", True) #stays on top
         coord = center_window(350, 200)
         self.top.geometry("350x200+{}+{}".format(str(coord[0]), str(coord[1])))
@@ -246,7 +251,7 @@ class preorderDialogue:
 
         preorder_id = 0
         self.top.destroy()
-        return 0
+        return None
 
 # places a category of buttons
 class buttonGrid():
@@ -294,6 +299,7 @@ class quantityDialogue():
     def __init__(self, parent, food_name):
         
         self.top = Toplevel(parent)
+        self.top.grab_set()
         self.top.attributes("-topmost", True) #stays on top
         coord = center_window(350, 200)
         self.top.geometry("350x200+{}+{}".format(str(coord[0]), str(coord[1])))
