@@ -8,6 +8,7 @@
 from tkinter import *
 from tkinter import ttk
 from functools import partial
+from itertools import zip_longest
 import csv
 import datetime
 import time
@@ -71,11 +72,11 @@ class pageGrid:
         
         # places category frames in window
         self.chilled_content = ttk.Frame(self.body)
-        self.chilled_content.grid(row = 1, column = 0, padx = 20, sticky = NW)
+        self.chilled_content.grid(row = 1, column = 0, padx = 35, sticky = NW)
         self.hot_content = ttk.Frame(self.body)
-        self.hot_content.grid(row = 1, column = 1, padx = 20, sticky = NW)
+        self.hot_content.grid(row = 1, column = 1, padx = 35, sticky = NW)
         self.treats_content = ttk.Frame(self.body)
-        self.treats_content.grid(row = 1, column = 2, padx = 20, sticky = NW)
+        self.treats_content.grid(row = 1, column = 2, padx = 35, sticky = NW)
         
         # places button groups in their respective categories
         buttonGrid(self.chilled_content, chilled_button_string)
@@ -139,7 +140,7 @@ class payment:
         
         self.logo = PhotoImage(file = 'arrow.png')
         
-        # calculate total to pay
+        # calculate total for order
         total = 0
         for i in range(len(orders)):
             total += orders[i][3]
@@ -493,7 +494,7 @@ def print_receipt(orders, order_num):
     contents.append(headings)
     contents.append("")
 
-    # calculate totals 
+    # calculate total
     total = 0
     for i in range(len(orders)):
         total += orders[i][3]
@@ -538,6 +539,19 @@ if __name__ == "__main__":
     hot_button_string = buttonGrid.food_name_price(Food.categorise()[1])
     treats_button_string = buttonGrid.food_name_price(Food.categorise()[2])
 
+    # extracts food names as list for summary csv
+    food_names = []
+    for lines in data:
+        food_names.append(lines[0])
+    food_names.remove(food_names[0]) # removes heading
+
+    # creates list of 0s
+    zero = []
+    for i in range(len(food_names)):
+        zero.append("0")
+
+    summary_columns = [food_names, zero]
+
     # places start screen contents
     global order_count
     order_count = 0
@@ -547,23 +561,16 @@ if __name__ == "__main__":
     # clear contents from previous day
     receipts = open("receipts.txt","w")
     receipts.close()
+    sales_summary = open("sales_summary.csv","w")
+    sales_summary.close()
 
     # resets the amount sold back to zero for the new day (1 day starts when the program is run)
-    with open('sales_summary.csv','r') as sales_read: 
-        item_count = 0
-        RESET = 0
-        new_day = []
-        reader = csv.reader(sales_read)
-        next(reader)
-        for line in reader:
-            if line[1] != RESET:
-                line[1]= RESET
-            new_day.append(line)
-
-    # writes it into csv 
-    with open('sales_summary.csv', 'w', newline='') as sales_write:
-        writer = csv.writer(sales_write)
-        writer.writerows(new_day)
+    # code modified from https://stackoverflow.com/questions/17704244/writing-python-lists-to-columns-in-csv
+    export_data = zip_longest(*summary_columns, fillvalue = '')
+    with open('sales_summary.csv','w', newline='') as sales_write: 
+        wr = csv.writer(sales_write)
+        wr.writerows(export_data)
+    sales_write.close()
     
     live_time = live_time()
     start = start_screen()
