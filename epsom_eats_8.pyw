@@ -1,7 +1,4 @@
-#version a - pictures updated, colours using ttk styling
-#version b - colours using manual button styling without ttk
-#version c - formatting of buttons, font sizings, formatting of text
-
+# note times will need to be changed from 2359
 
 from tkinter import *
 from tkinter import ttk
@@ -11,7 +8,7 @@ import csv
 import datetime
 import time
 
-class Food:
+class food:
     def __init__(self, row, header):
         #initiates each row as an instance and headings as their attributes -(from https://stackoverflow.com/questions/47445586/how-to-read-the-contents-of-a-csv-file-into-a-class-with-each-csv-row-as-a-class)
         self.__dict__ = dict(zip(header, row)) 
@@ -42,12 +39,12 @@ class Food:
         chilled_food_names = []
         treats_food_names = []
         for i in range(len(foods)):
-            if Food.find_category(i) == "Chilled":
-                chilled_food_names.append(Food.find_food_name(i))
-            elif Food.find_category(i) == "Hot":
-                hot_food_names.append(Food.find_food_name(i))
+            if food.find_category(i) == "Chilled":
+                chilled_food_names.append(food.find_food_name(i))
+            elif food.find_category(i) == "Hot":
+                hot_food_names.append(food.find_food_name(i))
             else:
-                treats_food_names.append(Food.find_food_name(i))
+                treats_food_names.append(food.find_food_name(i))
         return chilled_food_names, hot_food_names, treats_food_names
 
 class pageGrid:
@@ -79,7 +76,163 @@ class pageGrid:
         buttonGrid(self.chilled_content, chilled_button_string)
         buttonGrid(self.hot_content, hot_button_string)
         buttonGrid(self.treats_content, treats_button_string)
+
+# places a category of buttons
+class buttonGrid():
+
+    def __init__(self, parent, food_names): 
         
+        self.parent = parent
+        self.food_names = food_names
+        num_rows = self.calculate_rows(food_names)
+        NUM_COLS = 2
+        buttons = []
+        count = 0
+        for c in range(NUM_COLS):
+            for r in range(num_rows):
+                if count < len(food_names):
+                    food_name = food_names[count]
+                    # prepares food name and price in a tidy format 
+                    output = "{} \n${:.2f}".format(food_name[0], float(food_name[1]))
+                    # partial code module from https://stackoverflow.com/questions/6920302/how-to-pass-arguments-to-a-button-command-in-tkinter/22290388
+                    buttons.append(Button(parent, text = output, width = 17,height=1, background="#fcd682" ,activebackground="#fcd682", command = partial(quantityDialogue, root, food_name[0])))
+                    buttons[count].grid(row = r, column = c, ipady=5, ipadx=5)
+                    count += 1
+                
+    # number of rows required to format all food names into two columns                 
+    def calculate_rows(self, food_names):
+            rows = len(food_names) / 2
+            if len(food_names) % 2 != 0:
+                rows += 0.5
+            return int(rows)
+
+    # to be used on button output
+    def food_name_price(food_names):
+        return_string = []
+        for i in food_names:
+            sub_list = []
+            # adds food name and its corresponding price as a sublist into the returned string
+            # adds food name
+            sub_list.append(i)
+            # finds corresponding index then price
+            sub_list.append(food.find_price(food.find_index(i))) 
+            return_string.append(sub_list)
+        return return_string
+
+class quantityDialogue(): 
+
+    def __init__(self, parent, food_name):
+        
+        self.top = Toplevel(parent)
+        self.top.grab_set()
+        self.top.attributes("-topmost", True) #stays on top
+        coord = center_window(350, 200)
+        self.top.geometry("350x200+{}+{}".format(str(coord[0]), str(coord[1])))
+        self.top.title("")
+        self.food_name = food_name
+        self.price = self.food_name_price_des(food_name)[1]
+        self.description = self.food_name_price_des(food_name)[2]
+        self.option = IntVar(value=0) #default option is 0
+        self.options = [0, 0, 1, 2, 3, 4, 5]
+
+        # set default to current quantity if already in cart
+        for item in orders:
+            if item[0] == self.food_name:
+                self.option = IntVar(value=item[2])
+        
+        ttk.Label(self.top, text = "{} - ${:.2f}".format(food_name, float(self.price)), style='darkredpopup.TLabel').grid(row = 0, column = 0, columnspan = 4, pady = 10, padx = 50)
+        ttk.Label(self.top, text = "{}".format(self.description),  font=('verdana', 8)).grid(row = 1, column = 0, columnspan = 4, pady = 5, padx = 50)
+        ttk.Label(self.top, text = "Quantity                  ", style='popupfont.TLabel').grid(row = 3, column = 1, columnspan = 2)
+        self.dropdown = ttk.OptionMenu(self.top, self.option, *self.options)
+        self.dropdown.grid(row = 3, column = 2)
+        # place holder for error message text 
+        self.place_holder = Label(self.top).grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 50) 
+        self.top.resizable(0,0)
+
+        ok_button = ttk.Button(self.top, text = "Ok", command = partial(self.ok), style='blue.TButton')
+        ok_button.grid(row = 4, column = 0, columnspan = 2, pady = 30, padx = 50)
+        cancel_button = ttk.Button(self.top, text = "Cancel", command = self.cancel)
+        cancel_button.grid(row = 4, column = 2, columnspan = 2, pady = 30, padx = 50)
+        self.check_disable()
+
+    # to find to information needed for the quantity selection dialogue 
+    def food_name_price_des(self, food_name):
+        return_string = []
+        # adds food name and its corresponding info into list 
+        return_string.append(food_name)
+        # finds corresponding index then other related information
+        return_string.append(food.find_price(food.find_index(food_name)))
+        return_string.append(food.find_description(food.find_index(food_name)))
+        return return_string
+
+    # disables dropdown and displays erorr msg if limit met
+    def check_disable(self):
+        # allows users to edit quantity of foods already added to cart
+        if len(orders) >= 3 and not any(self.food_name in sublist for sublist in orders):
+            self.error_msg = ttk.Label(self.top, text = "Limit of 3 types of food items per order", style='rederror.TLabel').grid(row = 2, column = 0, columnspan = 4, padx = 50)
+            self.dropdown.configure(state = "disabled")
+        else:
+            self.dropdown.configure(state = "enabled")       
+
+    def ok(self):
+        item_order = []
+        value = int(self.option.get())
+
+        # update quantity if it has already been added to cart (editing)
+        for item in orders:
+            if item[0] == self.food_name:
+                item[2] = value
+                item[3] = round(value*float(self.price), 1)
+                if value == 0:
+                    orders.remove(item)
+                self.top.destroy()
+                return None
+
+        # don't save an order of zero quantity 
+        if value == 0:
+            self.top.destroy()
+            return None
+        
+        item_order.append(self.food_name)
+        item_order.append(self.price)
+        item_order.append(value)
+        item_order.append(round(value*float(self.price), 1))
+        orders.append(item_order)
+        self.top.destroy()
+        return None
+        
+    def cancel(self):
+        self.top.destroy()
+
+class payment:
+    def __init__(self, parent):
+        self.top = Toplevel(parent)
+        self.top.grab_set()
+        self.top.attributes("-topmost", True) #stays on top
+        coord = center_window(350, 200)
+        self.top.geometry("350x200+{}+{}".format(str(coord[0]), str(coord[1])))
+        self.top.resizable(0,0)
+        self.top.title("")
+        
+        self.logo = PhotoImage(file = 'arrow.png')
+        
+        total = find_total()
+        
+        ttk.Label(self.top, text = "Please pay below",style='darkredbigpopup.TLabel').grid(row = 0, column = 0, columnspan = 4, pady = 5, padx = 50)
+        ttk.Label(self.top, text="Due ${:.2f}".format(float(total)),style='popupfont.TLabel').grid(row = 1, column = 0, columnspan = 4, padx = 50)
+        Label(self.top, image = self.logo).grid(row = 2, column = 1, columnspan = 2, padx = 50)
+        
+        # note that paid button will not be displayed in actual program, paymentAccepted will be commanded through connection to the EFTPOS machines 
+        ttk.Button(self.top, text = "<paid>", command = self.paid).grid(row = 3, column = 0, columnspan = 2, padx = 50)
+        ttk.Button(self.top, text = "Cancel", command = self.cancel).grid(row = 3, column = 2, columnspan = 2, padx = 50)
+
+    def paid(self):
+        self.top.destroy()
+        paymentAccepted(root)
+        
+    def cancel(self):
+        self.top.destroy()
+
 class orderConfirm:
     def __init__(self, parent):
 
@@ -101,11 +254,11 @@ class orderConfirm:
         self.okcancel.grid()
 
         self.top.title("")
-        title = ttk.Label(self.body, text = "Order Confirmation",style='darkredpopup.TLabel').grid(row = 0, column = 0, pady = 1, sticky = N, padx = 5, columnspan = 4)
-        heading_1 = ttk.Label(self.body, text = "Item\n ", style='styleconfirm.TLabel').grid(row = 1, column = 0, pady = 5, sticky = W, padx = 14)
-        heading_2 = ttk.Label(self.body, text = "Price\n ", style='styleconfirm.TLabel').grid(row = 1, column = 1, pady = 5, sticky = W, padx = 10)
-        heading_3 = ttk.Label(self.body, text = "Quantity\n ", style='styleconfirm.TLabel').grid(row = 1, column = 2, pady = 5, sticky = W, padx = 10)
-        heading_4 = ttk.Label(self.body, text = "Total\n ", style='styleconfirm.TLabel').grid(row = 1, column = 3, pady = 5, sticky = W, padx = 10)
+        title = ttk.Label(self.body, text = "Order Confirmation",style='darkredpopup.TLabel').grid(row = 0, column = 0, pady = 3, sticky = N, padx = 5, columnspan = 4)
+        heading_1 = ttk.Label(self.body, text = "Item\n ", style='styleconfirm.TLabel').grid(row = 1, column = 0, sticky = W, padx = 14)
+        heading_2 = ttk.Label(self.body, text = "Price\n ", style='styleconfirm.TLabel').grid(row = 1, column = 1, sticky = W, padx = 10)
+        heading_3 = ttk.Label(self.body, text = "Quantity\n ", style='styleconfirm.TLabel').grid(row = 1, column = 2, sticky = W, padx = 10)
+        heading_4 = ttk.Label(self.body, text = "Total\n ", style='styleconfirm.TLabel').grid(row = 1, column = 3, sticky = W, padx = 10)
 
         for rows in range(len(orders)):
             Label(self.body, text = (orders[rows][0])).grid(row = (rows+2), column = 0, sticky = W, padx = 14)
@@ -113,9 +266,11 @@ class orderConfirm:
             Label(self.body, text = (orders[rows][2])).grid(row = (rows+2), column = 2, sticky = W, padx = 10)
             Label(self.body, text = "${:.2f}".format(float(orders[rows][3]))).grid(row = (rows+2), column = 3, sticky = W, padx = 10)
 
+        ttk.Label(self.body, text = "Total: ${:.2f}".format(float(find_total())), style='styleconfirm.TLabel').grid(row = 5, column = 0, sticky = W, padx = 14, pady = 5)
+
         # insert placeholders here based on size of orders list
-        for i in range(4 - len(orders)):
-            Label(self.body, text = "").grid(row = (6+i))
+        for i in range(3 - len(orders)):
+            Label(self.body, text = "").grid(row = (7+i))
 
         ttk.Button(self.okcancel, text = "Ok", style='blue.TButton', command = self.ok).grid(row = 0, column = 0, padx = 50)
         ttk.Button(self.okcancel, text = "Cancel", command = self.cancel).grid(row = 0, column = 1, padx = 50)
@@ -127,38 +282,6 @@ class orderConfirm:
     def cancel(self):
         self.top.destroy()
 
-
-class payment:
-    def __init__(self, parent):
-        self.top = Toplevel(parent)
-        self.top.grab_set()
-        self.top.attributes("-topmost", True) #stays on top
-        coord = center_window(350, 200)
-        self.top.geometry("350x200+{}+{}".format(str(coord[0]), str(coord[1])))
-        self.top.resizable(0,0)
-        self.top.title("")
-        
-        self.logo = PhotoImage(file = 'arrow.png')
-        
-        # calculate total for order
-        total = 0
-        for i in range(len(orders)):
-            total += orders[i][3]
-
-        ttk.Label(self.top, text = "Please pay below",style='darkredbigpopup.TLabel').grid(row = 0, column = 0, columnspan = 4, pady = 5, padx = 50)
-        ttk.Label(self.top, text="Due ${:.2f}".format(total),style='popupfont.TLabel').grid(row = 1, column = 0, columnspan = 4, padx = 50)
-        Label(self.top, image = self.logo).grid(row = 2, column = 1, columnspan = 2, padx = 50)
-        
-        # note that paid button will not be displayed in actual program, paymentAccepted will be commanded through connection to the EFTPOS machines 
-        ttk.Button(self.top, text = "<paid>", command = self.paid).grid(row = 3, column = 0, columnspan = 2, padx = 50)
-        ttk.Button(self.top, text = "Cancel", command = self.cancel).grid(row = 3, column = 2, columnspan = 2, padx = 50)
-
-    def paid(self):
-        self.top.destroy()
-        paymentAccepted(root)
-        
-    def cancel(self):
-        self.top.destroy()
 
 class paymentAccepted:
     def __init__(self, parent):
@@ -186,7 +309,7 @@ class paymentAccepted:
         self.tick_img.destroy()
 
         order_num = find_order_num()
-        ttk.Label(self.top, text = "THANK YOU!", style='darkredbigpopup.TLabel').grid(row=0,column=0, padx=40,pady=5)
+        ttk.Label(self.top, text = "Thank you!", style='darkredbigpopup.TLabel').grid(row=0,column=0, padx=40,pady=5)
         ttk.Label(self.top, text = "Your order number is", style='popupfont.TLabel').grid(row=1,column=0,padx=40,pady=5)
         order_num_txt = ttk.Label(self.top, text = "{}".format(order_num), style='darkredorderno.TLabel')
         order_num_txt.grid(row=2,column=0, padx=40,pady=5)
@@ -218,6 +341,7 @@ class preorderDialogue:
         
         self.top.title("")
         self.prompt = ttk.Label(self.top, text = "Enter your student ID below",  style='darkredpopup.TLabel').grid(row = 0, column = 0, columnspan = 4, pady = 30, padx = 50)
+        
         self.entry_field = Entry(self.top)
         self.entry_field.grid(row = 1, column = 0, columnspan = 4, padx = 50)
         # place holder for error message text 
@@ -251,130 +375,6 @@ class preorderDialogue:
         self.top.destroy()
         return None
 
-# places a category of buttons
-class buttonGrid():
-
-    def __init__(self, parent, food_names): 
-        
-        num_rows = self.calculate_rows(food_names)
-        NUM_COLS = 2
-        buttons = []
-        count = 0
-        for c in range(NUM_COLS):
-            for r in range(num_rows):
-                if count < len(food_names):
-                    food_name = food_names[count]
-                    # prepares food name and price in a tidy format 
-                    output = "{} \n${:.2f}".format(food_name[0], float(food_name[1]))
-                    # partial code module from https://stackoverflow.com/questions/6920302/how-to-pass-arguments-to-a-button-command-in-tkinter/22290388
-                    buttons.append(Button(parent, text = output, width = 17,height=1, background="#fcd682" ,activebackground="#fcd682", command = partial(quantityDialogue, root, food_name[0])))
-                    buttons[count].grid(row = r, column = c, ipady=5, ipadx=5)
-                    count += 1
-                
-    # number of rows required to format all food names into two columns                 
-    def calculate_rows(self, food_names):
-            rows = len(food_names) / 2
-            if len(food_names) % 2 != 0:
-                rows += 0.5
-            return int(rows)
-
-    # to be used on button output
-    def food_name_price(food_names):
-        return_string = []
-        for i in food_names:
-            sub_list = []
-            # adds food name and its corresponding price as a sublist into the returned string
-            # adds food name
-            sub_list.append(i)
-            # finds corresponding index then price
-            sub_list.append(Food.find_price(Food.find_index(i))) 
-            return_string.append(sub_list)
-        return return_string
-
-# will be combined with quantity selection pop up component later 
-class quantityDialogue(): 
-
-    def __init__(self, parent, food_name):
-        
-        self.top = Toplevel(parent)
-        self.top.grab_set()
-        self.top.attributes("-topmost", True) #stays on top
-        coord = center_window(350, 200)
-        self.top.geometry("350x200+{}+{}".format(str(coord[0]), str(coord[1])))
-        self.top.title("")
-        self.food_name = food_name
-        self.price = self.food_name_price_des(food_name)[1]
-        self.description = self.food_name_price_des(food_name)[2]
-        self.option = IntVar(value=0) #default option is 0
-        self.options = [0, 0, 1, 2, 3, 4, 5]
-
-        # set default to current quantity if already in cart
-        for item in orders:
-            if item[0] == self.food_name:
-                self.option = IntVar(value=item[2])
-        
-        ttk.Label(self.top, text = "{} - ${:.2f}".format(food_name, float(self.price)), style='darkredpopup.TLabel').grid(row = 0, column = 0, columnspan = 4, pady = 10, padx = 50)
-        ttk.Label(self.top, text = "{}".format(self.description),  font=('verdana', 8)).grid(row = 1, column = 0, columnspan = 4, pady = 5, padx = 50)
-        ttk.Label(self.top, text = "Quantity                  ", style='popupfont.TLabel').grid(row = 3, column = 1, columnspan = 2)
-        self.dropdown = ttk.OptionMenu(self.top, self.option, *self.options)
-        self.dropdown.grid(row = 3, column = 2)
-        # place holder for error message text 
-        self.place_holder = Label(self.top).grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 50) 
-        self.top.resizable(0,0)
-
-        ok_button = ttk.Button(self.top, text = "Ok", command = partial(self.ok, orders), style='blue.TButton')
-        ok_button.grid(row = 4, column = 0, columnspan = 2, pady = 30, padx = 50)
-        cancel_button = ttk.Button(self.top, text = "Cancel", command = self.cancel)
-        cancel_button.grid(row = 4, column = 2, columnspan = 2, pady = 30, padx = 50)
-        self.check_disable()
-
-    # to find to information needed for the quantity selection dialogue 
-    def food_name_price_des(self, food_name):
-        return_string = []
-        # adds food name and its corresponding info into list 
-        return_string.append(food_name)
-        # finds corresponding index then other related information
-        return_string.append(Food.find_price(Food.find_index(food_name)))
-        return_string.append(Food.find_description(Food.find_index(food_name)))
-        return return_string
-
-    # disables dropdown and displays erorr msg if limit met
-    def check_disable(self):
-        # allows users to edit quantity of foods already added to cart
-        if len(orders) >= 3 and not any(self.food_name in sublist for sublist in orders):
-            self.error_msg = ttk.Label(self.top, text = "Limit of 3 types of food items per order", style='rederror.TLabel').grid(row = 2, column = 0, columnspan = 4, padx = 50)
-            self.dropdown.configure(state = "disabled")
-        else:
-            self.dropdown.configure(state = "enabled")       
-
-    def ok(self, orders):
-        item_order = []
-        value = int(self.option.get())
-
-        # update quantity if it has already been added to cart (editing)
-        for item in orders:
-            if item[0] == self.food_name:
-                item[2] = value
-                if value == 0:
-                    orders.remove(item)
-                self.top.destroy()
-                return orders
-
-        # don't save an order of zero quantity 
-        if value == 0:
-            self.top.destroy()
-            return orders
-        
-        item_order.append(self.food_name)
-        item_order.append(self.price)
-        item_order.append(value)
-        item_order.append(round(value*float(self.price), 1))
-        orders.append(item_order)
-        self.top.destroy()
-        return orders
-        
-    def cancel(self):
-        self.top.destroy()
 
 def live_time():
     # keeps time ticking
@@ -413,6 +413,19 @@ def start_screen():
         
     update_buttons()
 
+def start_menu():
+    global page_grid
+    page_grid = pageGrid(root)
+    # remove not needed start screen widgets 
+    preorder_button.grid_forget()
+    start_button.grid_forget()
+    title.grid_forget()
+
+
+def preorder():
+    preorder_dialogue = preorderDialogue(root)
+
+
 def restart():
     global preorder_id
     orders = []
@@ -443,18 +456,7 @@ def check_startorder_time():
         return "disabled"
     else:
         return "active"
-
-def preorder():
-    preorder_dialogue = preorderDialogue(root)
     
-def start_menu():
-    global page_grid
-    page_grid = pageGrid(root)
-    # remove not needed start screen widgets 
-    preorder_button.grid_forget()
-    start_button.grid_forget()
-    title.grid_forget()
-
 def find_order_num():
     order_num = ""
     global order_count
@@ -464,6 +466,13 @@ def find_order_num():
         return str(preorder_id)+str(order_count)
     else: 
         return str(order_count)
+
+def find_total():
+    # calculate total for order
+    total = 0
+    for i in range(len(orders)):
+        total += orders[i][3]
+    return total
         
 def center_window(window_width, window_height):
 
@@ -497,10 +506,7 @@ def print_receipt(orders, order_num):
     contents.append(headings)
     contents.append("")
 
-    # calculate total
-    total = 0
-    for i in range(len(orders)):
-        total += orders[i][3]
+    total = find_total()
 
     # format orders into rows 
     for item in orders:
@@ -515,7 +521,7 @@ def print_receipt(orders, order_num):
         for x in i:
             receipts.write(str(x)+"")
         receipts.write("\n")
-    receipts.write("\nTotal paid: ${:.2f} \n \n".format(total))
+    receipts.write("\nTotal paid: ${:.2f} \n \n".format(float(total)))
 
     receipts.close()
 
@@ -550,12 +556,12 @@ if __name__ == "__main__":
     #opens menu file 
     data = list(csv.reader(open('menu.csv')))
     #passes in heading and rest of rows and collects instances into list
-    foods = [Food(i, data[0]) for i in data[1:]]
+    foods = [food(i, data[0]) for i in data[1:]]
 
     # extracts food_names as lists in each category
-    chilled_button_string = buttonGrid.food_name_price(Food.categorise()[0])
-    hot_button_string = buttonGrid.food_name_price(Food.categorise()[1])
-    treats_button_string = buttonGrid.food_name_price(Food.categorise()[2])
+    chilled_button_string = buttonGrid.food_name_price(food.categorise()[0])
+    hot_button_string = buttonGrid.food_name_price(food.categorise()[1])
+    treats_button_string = buttonGrid.food_name_price(food.categorise()[2])
 
     # extracts food names as list for summary csv
     food_names = []
@@ -589,7 +595,8 @@ if __name__ == "__main__":
         wr = csv.writer(sales_write)
         wr.writerows(export_data)
     sales_write.close()
-    
+
+    # starts program    
     live_time = live_time()
     start = start_screen()
 
