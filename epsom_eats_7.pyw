@@ -1,10 +1,7 @@
-# implementation of sales summary update to csv
-# receipt printing to txt file (food name, quantity and preorder number)
-# freeze underlying window when pop up appears to prevent invalid interaction
+#version a - pictures updated, colours using ttk styling
+#version b - colours using manual button styling without ttk
+#version c - formatting of buttons, font sizings, formatting of text
 
-# TO DO:
-# update pictures
-# colours, fonts etc
 
 from tkinter import *
 from tkinter import ttk
@@ -55,29 +52,28 @@ class Food:
 
 class pageGrid:
     def __init__(self, parent):
-        self.frame_header = ttk.Frame(parent)
+        self.frame_header = ttk.Frame(parent, style='white.TFrame')
         self.frame_header.grid()
-        self.body = ttk.Frame(parent)
+        self.body = ttk.Frame(parent, style='white.TFrame')
         self.body.grid()
-
-        ttk.Label(self.frame_header, text = "Epsom Eats", font=('verdana', 20)).grid(row = 0, column = 1)
-        ttk.Label(self.frame_header, text = "Please select the item to order", font=('verdana', 10)).grid(row = 2, column = 1)
-        ttk.Button(self.frame_header, text = "FINISH", width = 20, command = partial(orderConfirm, root)).grid(row = 2, column = 2, sticky = W, padx = 100, ipadx = 10, pady = 5)
-        ttk.Button(self.frame_header, text = "CANCEL", width = 20, command = restart).grid(row = 2, column = 0, sticky = E, padx = 100, ipadx = 10, pady = 5)
+        ttk.Label(self.frame_header, text = "EPSOM EATS", font=('verdana', 20, 'bold'),style='darkred.TLabel').grid(row = 0, column = 1)
+        ttk.Label(self.frame_header, text = "Please select the item to order",style='darkred.TLabel').grid(row = 2, column = 1)
+        Button(self.frame_header, text = "FINISH", width = 20, command = partial(orderConfirm, root),font=('verdana', 10, 'bold'), activeforeground="#691822",foreground="#691822", activebackground="#fdd4b7", background="#fdd4b7").grid(row = 2, column = 2, sticky = W, padx = 100, ipadx = 10, pady = 5)
+        Button(self.frame_header, text = "CANCEL", width = 20, command = restart,font=('verdana', 10, 'bold'), activeforeground="#691822",foreground="#691822", activebackground="#fdd4b7", background="#fdd4b7").grid(row = 2, column = 0, sticky = E, padx = 100, ipadx = 10, pady = 5)
 
         # place category headings
 
-        ttk.Label(self.body, text = "CHILLED", font=('verdana', 10, 'bold')).grid(row = 0, column = 0)
-        ttk.Label(self.body, text = "HOT", font=('verdana', 10, 'bold')).grid(row = 0, column = 1)
-        ttk.Label(self.body, text = "TREATS", font=('verdana', 10, 'bold')).grid(row = 0, column = 2)
+        ttk.Label(self.body, text = "CHILLED", style='menufont.TLabel').grid(row = 0, column = 0)
+        ttk.Label(self.body, text = "HOT", style='menufont.TLabel').grid(row = 0, column = 1)
+        ttk.Label(self.body, text = "TREATS", style='menufont.TLabel').grid(row = 0, column = 2)
         
         # places category frames in window
-        self.chilled_content = ttk.Frame(self.body)
-        self.chilled_content.grid(row = 1, column = 0, padx = 35, sticky = NW)
-        self.hot_content = ttk.Frame(self.body)
-        self.hot_content.grid(row = 1, column = 1, padx = 35, sticky = NW)
-        self.treats_content = ttk.Frame(self.body)
-        self.treats_content.grid(row = 1, column = 2, padx = 35, sticky = NW)
+        self.chilled_content = ttk.Frame(self.body, style='white.TFrame')
+        self.chilled_content.grid(row = 1, column = 0, padx = 7, sticky = NW)
+        self.hot_content = ttk.Frame(self.body,style='white.TFrame')
+        self.hot_content.grid(row = 1, column = 1, padx = 7, sticky = NW)
+        self.treats_content = ttk.Frame(self.body, style='white.TFrame')
+        self.treats_content.grid(row = 1, column = 2, padx = 7, sticky = NW)
         
         # places button groups in their respective categories
         buttonGrid(self.chilled_content, chilled_button_string)
@@ -105,23 +101,24 @@ class orderConfirm:
         self.okcancel.grid()
 
         self.top.title("")
-        heading_1 = Label(self.body, text = "Item\n ", font = ('verdana', 8, 'bold')).grid(row = 0, column = 0, pady = 5, sticky = W, padx = 10)
-        heading_2 = Label(self.body, text = "Price\n ", font = ('verdana', 8, 'bold')).grid(row = 0, column = 1, pady = 5, sticky = W, padx = 10)
-        heading_3 = Label(self.body, text = "Quantity\n ", font = ('verdana', 8, 'bold')).grid(row = 0, column = 2, pady = 5, sticky = W, padx = 10)
-        heading_4 = Label(self.body, text = "Total\n ", font = ('verdana', 8, 'bold')).grid(row = 0, column = 3, pady = 5, sticky = W, padx = 10)
+        title = ttk.Label(self.body, text = "Order Confirmation",style='darkredpopup.TLabel').grid(row = 0, column = 0, pady = 1, sticky = N, padx = 5, columnspan = 4)
+        heading_1 = ttk.Label(self.body, text = "Item\n ", style='styleconfirm.TLabel').grid(row = 1, column = 0, pady = 5, sticky = W, padx = 14)
+        heading_2 = ttk.Label(self.body, text = "Price\n ", style='styleconfirm.TLabel').grid(row = 1, column = 1, pady = 5, sticky = W, padx = 10)
+        heading_3 = ttk.Label(self.body, text = "Quantity\n ", style='styleconfirm.TLabel').grid(row = 1, column = 2, pady = 5, sticky = W, padx = 10)
+        heading_4 = ttk.Label(self.body, text = "Total\n ", style='styleconfirm.TLabel').grid(row = 1, column = 3, pady = 5, sticky = W, padx = 10)
 
         for rows in range(len(orders)):
-            Label(self.body, text = (orders[rows][0])).grid(row = (rows+1), column = 0, sticky = W, padx = 10)
-            Label(self.body, text = "${:.2f}".format(float(orders[rows][1]))).grid(row = (rows+1), column = 1, sticky = W, padx = 10)
-            Label(self.body, text = (orders[rows][2])).grid(row = (rows+1), column = 2, sticky = W, padx = 10)
-            Label(self.body, text = "${:.2f}".format(float(orders[rows][3]))).grid(row = (rows+1), column = 3, sticky = W, padx = 10)
+            Label(self.body, text = (orders[rows][0])).grid(row = (rows+2), column = 0, sticky = W, padx = 14)
+            Label(self.body, text = "${:.2f}".format(float(orders[rows][1]))).grid(row = (rows+2), column = 1, sticky = W, padx = 10)
+            Label(self.body, text = (orders[rows][2])).grid(row = (rows+2), column = 2, sticky = W, padx = 10)
+            Label(self.body, text = "${:.2f}".format(float(orders[rows][3]))).grid(row = (rows+2), column = 3, sticky = W, padx = 10)
 
         # insert placeholders here based on size of orders list
-        for i in range(5 - len(orders)):
-            Label(self.body, text = "").grid(row = (5+i))
+        for i in range(4 - len(orders)):
+            Label(self.body, text = "").grid(row = (6+i))
 
-        ttk.Button(self.okcancel, text = "Ok", command = self.ok).grid(row = 0, column = 0, pady = 10, padx = 50)
-        ttk.Button(self.okcancel, text = "Cancel", command = self.cancel).grid(row = 0, column = 1, pady = 10, padx = 50)
+        ttk.Button(self.okcancel, text = "Ok", style='blue.TButton', command = self.ok).grid(row = 0, column = 0, padx = 50)
+        ttk.Button(self.okcancel, text = "Cancel", command = self.cancel).grid(row = 0, column = 1, padx = 50)
 
     def ok(self):
         self.top.destroy()
@@ -148,12 +145,13 @@ class payment:
         for i in range(len(orders)):
             total += orders[i][3]
 
-        Label(self.top, text = "Please pay below \n Due ${:.2f}".format(total)).grid(row = 0, column = 0, columnspan = 4, pady = 5, padx = 50)
-        Label(self.top, image = self.logo).grid(row = 1, column = 1, columnspan = 2, padx = 50)
+        ttk.Label(self.top, text = "Please pay below",style='darkredbigpopup.TLabel').grid(row = 0, column = 0, columnspan = 4, pady = 5, padx = 50)
+        ttk.Label(self.top, text="Due ${:.2f}".format(total),style='popupfont.TLabel').grid(row = 1, column = 0, columnspan = 4, padx = 50)
+        Label(self.top, image = self.logo).grid(row = 2, column = 1, columnspan = 2, padx = 50)
         
         # note that paid button will not be displayed in actual program, paymentAccepted will be commanded through connection to the EFTPOS machines 
-        ttk.Button(self.top, text = "<paid>", command = self.paid).grid(row = 2, column = 0, columnspan = 2, pady = 10, padx = 50)
-        ttk.Button(self.top, text = "Cancel", command = self.cancel).grid(row = 2, column = 2, columnspan = 2, pady = 10, padx = 50)
+        ttk.Button(self.top, text = "<paid>", command = self.paid).grid(row = 3, column = 0, columnspan = 2, padx = 50)
+        ttk.Button(self.top, text = "Cancel", command = self.cancel).grid(row = 3, column = 2, columnspan = 2, padx = 50)
 
     def paid(self):
         self.top.destroy()
@@ -173,12 +171,12 @@ class paymentAccepted:
 
         self.top.title("")
 
-        self.logo = PhotoImage(file = 'arrow.png')
+        self.logo = PhotoImage(file = 'tick.png')
 
-        self.paid_msg = Label(self.top, text = "Payment accepted")
-        self.paid_msg.grid(row = 0, column = 0, padx = 125)
+        self.paid_msg = ttk.Label(self.top, text = "Payment accepted", style='darkredbigpopup.TLabel')
+        self.paid_msg.grid(row = 0, column = 0, pady= 10, padx = 80)
         self.tick_img = Label(self.top, image = self.logo)
-        self.tick_img.grid(row = 1, column = 0, padx = 125)
+        self.tick_img.grid(row = 1, column = 0, padx = 80)
         
         # 2 second delay
         self.top.after(2000, self.order_number)
@@ -188,9 +186,11 @@ class paymentAccepted:
         self.tick_img.destroy()
 
         order_num = find_order_num()
-
-        order_num_txt = Label(self.top, text = "Your order number is {}".format(order_num))
-        order_num_txt.grid(padx = 110)
+        ttk.Label(self.top, text = "THANK YOU!", style='darkredbigpopup.TLabel').grid(row=0,column=0, padx=40,pady=5)
+        ttk.Label(self.top, text = "Your order number is", style='popupfont.TLabel').grid(row=1,column=0,padx=40,pady=5)
+        order_num_txt = ttk.Label(self.top, text = "{}".format(order_num), style='darkredorderno.TLabel')
+        order_num_txt.grid(row=2,column=0, padx=40,pady=5)
+        ttk.Label(self.top, text = "Please pick up your order at the front counter", style='popupfont.TLabel').grid(row=3,column=0, padx=20,pady=5)
 
         for order in orders:
             food_name = order[0]
@@ -217,12 +217,12 @@ class preorderDialogue:
         self.top.resizable(0,0)
         
         self.top.title("")
-        self.prompt = Label(self.top, text = "Enter your student ID below").grid(row = 0, column = 0, columnspan = 4, pady = 30, padx = 50)
+        self.prompt = ttk.Label(self.top, text = "Enter your student ID below",  style='darkredpopup.TLabel').grid(row = 0, column = 0, columnspan = 4, pady = 30, padx = 50)
         self.entry_field = Entry(self.top)
         self.entry_field.grid(row = 1, column = 0, columnspan = 4, padx = 50)
         # place holder for error message text 
         self.place_holder = Label(self.top).grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 50) 
-        ttk.Button(self.top, text = "Ok", command = self.ok).grid(row = 3, column = 0, columnspan = 2, pady = 20, padx = 50)
+        ttk.Button(self.top, text = "Ok", command = self.ok, style='blue.TButton').grid(row = 3, column = 0, columnspan = 2, pady = 20, padx = 50)
         ttk.Button(self.top, text = "Cancel", command = self.cancel).grid(row = 3, column = 2, columnspan = 2, pady = 20, padx = 50)
 
     def ok(self):
@@ -239,13 +239,11 @@ class preorderDialogue:
             else:
                 # clear input field
                 self.entry_field.delete(0, 'end') 
-                self.error_msg = Label(self.top, text = "Please enter a valid student ID").grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5)
-                root.after(1000, update_buttons)
+                self.error_msg = ttk.Label(self.top, text = "Please enter a valid student ID",style='rederror.TLabel').grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5)
 
         except ValueError:
             self.entry_field.delete(0, 'end')
-            self.error_msg = Label(self.top, text = "Please enter a valid student ID").grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5)
-            root.after(1000, update_buttons)
+            self.error_msg = ttk.Label(self.top, text = "Please enter a valid student ID", style='rederror.TLabel').grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5)
 
     def cancel(self):
 
@@ -269,8 +267,8 @@ class buttonGrid():
                     # prepares food name and price in a tidy format 
                     output = "{} \n${:.2f}".format(food_name[0], float(food_name[1]))
                     # partial code module from https://stackoverflow.com/questions/6920302/how-to-pass-arguments-to-a-button-command-in-tkinter/22290388
-                    buttons.append(ttk.Button(parent, text = output, width = 20, command = partial(quantityDialogue, root, food_name[0])))
-                    buttons[count].grid(row = r, column = c)
+                    buttons.append(Button(parent, text = output, width = 17,height=1, background="#fcd682" ,activebackground="#fcd682", command = partial(quantityDialogue, root, food_name[0])))
+                    buttons[count].grid(row = r, column = c, ipady=5, ipadx=5)
                     count += 1
                 
     # number of rows required to format all food names into two columns                 
@@ -315,18 +313,19 @@ class quantityDialogue():
             if item[0] == self.food_name:
                 self.option = IntVar(value=item[2])
         
-        Label(self.top, text = "{} - ${:.2f} \n {}".format(food_name, float(self.price), self.description)).grid(row = 0, column = 0, columnspan = 4, pady = 20, padx = 50)
-        Label(self.top, text = "Quantity").grid(row = 1, column = 1, padx = 30)
+        ttk.Label(self.top, text = "{} - ${:.2f}".format(food_name, float(self.price)), style='darkredpopup.TLabel').grid(row = 0, column = 0, columnspan = 4, pady = 10, padx = 50)
+        ttk.Label(self.top, text = "{}".format(self.description),  font=('verdana', 8)).grid(row = 1, column = 0, columnspan = 4, pady = 5, padx = 50)
+        ttk.Label(self.top, text = "Quantity                  ", style='popupfont.TLabel').grid(row = 3, column = 1, columnspan = 2)
         self.dropdown = ttk.OptionMenu(self.top, self.option, *self.options)
-        self.dropdown.grid(row = 1, column = 2, columnspan = 2)
+        self.dropdown.grid(row = 3, column = 2)
         # place holder for error message text 
         self.place_holder = Label(self.top).grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 50) 
         self.top.resizable(0,0)
 
-        ok_button = ttk.Button(self.top, text = "Ok", command = partial(self.ok, orders))
-        ok_button.grid(row = 3, column = 0, columnspan = 2, pady = 20, padx = 50)
+        ok_button = ttk.Button(self.top, text = "Ok", command = partial(self.ok, orders), style='blue.TButton')
+        ok_button.grid(row = 4, column = 0, columnspan = 2, pady = 30, padx = 50)
         cancel_button = ttk.Button(self.top, text = "Cancel", command = self.cancel)
-        cancel_button.grid(row = 3, column = 2, columnspan = 2, pady = 20, padx = 50)
+        cancel_button.grid(row = 4, column = 2, columnspan = 2, pady = 30, padx = 50)
         self.check_disable()
 
     # to find to information needed for the quantity selection dialogue 
@@ -343,7 +342,7 @@ class quantityDialogue():
     def check_disable(self):
         # allows users to edit quantity of foods already added to cart
         if len(orders) >= 3 and not any(self.food_name in sublist for sublist in orders):
-            self.error_msg = Label(self.top, text = "Limit of 3 types of food items per order").grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 50)
+            self.error_msg = ttk.Label(self.top, text = "Limit of 3 types of food items per order", style='rederror.TLabel').grid(row = 2, column = 0, columnspan = 4, padx = 50)
             self.dropdown.configure(state = "disabled")
         else:
             self.dropdown.configure(state = "enabled")       
@@ -382,7 +381,7 @@ def live_time():
     global time1
     time1 = ''
     global clock
-    clock = Label(root)
+    clock = ttk.Label(root, style='darkorange.TLabel')
     clock.grid(row = 0, sticky = NW, padx = 10, pady = 5)
     tick()
 
@@ -402,15 +401,15 @@ def start_screen():
     global orders
     orders = []
     global title
-    title = ttk.Label(root, text = "Epsom Eats", font=('verdana', 50))
+    title = ttk.Label(root, text = "EPSOM EATS",style='darkorange.TLabel', font=('verdana', 50))
     global preorder_button
-    preorder_button = ttk.Button(root, text = "Pre Order", state = check_preorder_time(), command = partial(preorder))
+    preorder_button = Button(root, text = "PRE ORDER", state = check_preorder_time(), command = partial(preorder), font=('verdana', 20, 'bold'), width=15, foreground='#691822',activeforeground="#691822", activebackground="#fdd4b7", background="#fdd4b7")
     global start_button
     
-    start_button = ttk.Button(root, text = "Start Order", state = check_startorder_time(), command = partial(start_menu))
-    preorder_button.grid(row = 3, padx = 300, pady = 20)
+    start_button = Button(root, text = "START ORDER", state = check_startorder_time(), command = partial(start_menu), font=('verdana', 20, 'bold'), width=15, foreground='#691822',activeforeground="#691822", activebackground="#fdd4b7", background="#fdd4b7")
+    preorder_button.grid(row = 3, padx = 300, pady = 15)
     start_button.grid(row = 2, padx = 300)
-    title.grid(row = 1, padx = 300, pady = 200)
+    title.grid(row = 1, padx = 300, pady = 150)
         
     update_buttons()
 
@@ -435,7 +434,7 @@ def check_preorder_time():
     if int(time.strftime('%H%M')) >= deadline:
         return "disabled"
     else:
-        return "enabled"
+        return "active"
 
 def check_startorder_time():
     deadlines = [2359, 2359, 2359, 2359, 2359, 2359, 2359]
@@ -443,11 +442,10 @@ def check_startorder_time():
     if int(time.strftime('%H%M')) >= deadline:
         return "disabled"
     else:
-        return "enabled"
+        return "active"
 
 def preorder():
     preorder_dialogue = preorderDialogue(root)
-    root.wait_window(preorder_dialogue.top)
     
 def start_menu():
     global page_grid
@@ -456,7 +454,6 @@ def start_menu():
     preorder_button.grid_forget()
     start_button.grid_forget()
     title.grid_forget()
-    return page_grid
 
 def find_order_num():
     order_num = ""
@@ -533,7 +530,22 @@ if __name__ == "__main__":
     root.overrideredirect(1) # clears min/max buttons, close buttons
     coord = center_window(1000, 650)
     root.geometry("1000x650+{}+{}".format(str(coord[0]), str(coord[1]-20))) 
+
+    # Styling
     ttk.Style().configure("TButton", justify = "center")
+    ttk.Style().configure("TLabel", justify = "center", font=('verdana', 10))
+    ttk.Style().configure("white.TFrame", background='white')
+    ttk.Style().configure('blue.TButton', background ='#29ade4')
+    ttk.Style().configure('darkorange.TLabel',foreground='#d55435', background='white')
+    ttk.Style().configure('darkred.TLabel', foreground='#691822', background='white')
+    ttk.Style().configure('darkredpopup.TLabel', foreground='#691822', font=('verdana', 10, 'bold'))
+    ttk.Style().configure('styleconfirm.TLabel', forground = '#000000', font=('verdana', 10, 'bold'))
+    ttk.Style().configure('darkredbigpopup.TLabel',  foreground='#691822', font=('verdana', 15, 'bold'))
+    ttk.Style().configure('darkredorderno.TLabel',  foreground='#691822', font=('verdana', 23,'bold'))
+    ttk.Style().configure('rederror.TLabel', foreground ='#ed2024', font=('verdana', 8, 'italic'))
+    ttk.Style().configure('menufont.TLabel', font=('verdana', 10, 'bold'),background='white')
+    ttk.Style().configure('popupfont.TLabel', font=('verdana', 10))
+    root.configure(background="white")
 
     #opens menu file 
     data = list(csv.reader(open('menu.csv')))
