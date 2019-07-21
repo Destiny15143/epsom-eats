@@ -1,4 +1,4 @@
-# note times will need to be changed from 2359
+# note times will need to be changed to 2359 for program to run outside valid times
 
 from tkinter import *
 from tkinter import ttk
@@ -442,7 +442,7 @@ def update_buttons():
     root.after(1000, update_buttons)
 
 def check_preorder_time():
-    deadlines = [2359, 2359, 2359, 2359, 2359, 2359, 2359]
+    deadlines = [1225, 1225, 1235, 1225, 1250]
     deadline = deadlines[datetime.datetime.today().weekday()] # finds day of the week as index
     if int(time.strftime('%H%M')) >= deadline:
         return "disabled"
@@ -450,7 +450,7 @@ def check_preorder_time():
         return "active"
 
 def check_startorder_time():
-    deadlines = [2359, 2359, 2359, 2359, 2359, 2359, 2359]
+    deadlines = [1255, 1255, 1305, 1255, 1245]
     deadline = deadlines[datetime.datetime.today().weekday()] # finds day of the week as index
     if int(time.strftime('%H%M')) >= deadline:
         return "disabled"
