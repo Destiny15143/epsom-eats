@@ -1,3 +1,3 @@
-# tuck-shop
-working tuck shop program
+# epsom-eats
+working food ordering program
 by Destiny, Heesu, Rachel
