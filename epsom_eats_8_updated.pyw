@@ -8,7 +8,8 @@ import csv
 import datetime
 import time
 
-class food:
+#------------------------START CLASSES ------------------------
+class food: #Destiny
     def __init__(self, row, header):
         #initiates each row as an instance and headings as their attributes -(from https://stackoverflow.com/questions/47445586/how-to-read-the-contents-of-a-csv-file-into-a-class-with-each-csv-row-as-a-class)
         self.__dict__ = dict(zip(header, row)) 
@@ -47,7 +48,7 @@ class food:
                 treats_food_names.append(food.find_food_name(i))
         return chilled_food_names, hot_food_names, treats_food_names
 
-class pageGrid:
+class pageGrid: #Heesu
     def __init__(self, parent):
         self.frame_header = ttk.Frame(parent, style='white.TFrame')
         self.frame_header.grid()
@@ -59,6 +60,7 @@ class pageGrid:
         Button(self.frame_header, text = "CANCEL", width = 20, command = restart,font=('verdana', 10, 'bold'), activeforeground="#691822",foreground="#691822", activebackground="#fdd4b7", background="#fdd4b7").grid(row = 2, column = 0, sticky = E, padx = 100, ipadx = 10, pady = 5)
 
         # place category headings
+        #Destiny
 
         ttk.Label(self.body, text = "CHILLED", style='menufont.TLabel').grid(row = 0, column = 0)
         ttk.Label(self.body, text = "HOT", style='menufont.TLabel').grid(row = 0, column = 1)
@@ -78,18 +80,21 @@ class pageGrid:
         buttonGrid(self.treats_content, treats_button_string)
 
 # places a category of buttons
-class buttonGrid():
+class buttonGrid(): #Destiny
 
     def __init__(self, parent, food_names): 
-        
+
         self.parent = parent
         self.food_names = food_names
         num_rows = self.calculate_rows(food_names)
         NUM_COLS = 2
         buttons = []
         count = 0
+        
+        # uses calculated rows and 2 columns to organise buttons in a grid format
         for c in range(NUM_COLS):
             for r in range(num_rows):
+                # organises for every food in the food name list passed in 
                 if count < len(food_names):
                     food_name = food_names[count]
                     # prepares food name and price in a tidy format 
@@ -119,7 +124,7 @@ class buttonGrid():
             return_string.append(sub_list)
         return return_string
 
-class quantityDialogue(): 
+class quantityDialogue(): #Rachel, with fix up by Destiny
 
     def __init__(self, parent, food_name):
         
@@ -133,7 +138,7 @@ class quantityDialogue():
         self.price = self.food_name_price_des(food_name)[1]
         self.description = self.food_name_price_des(food_name)[2]
         self.option = IntVar(value=0) #default option is 0
-        self.options = [0, 0, 1, 2, 3, 4, 5]
+        self.options = [0, 0, 1, 2, 3, 4, 5] # need 2 zeroes (1 to display on drop down and 1 to display as default)
 
         # set default to current quantity if already in cart
         for item in orders:
@@ -145,7 +150,7 @@ class quantityDialogue():
         ttk.Label(self.top, text = "Quantity                  ", style='popupfont.TLabel').grid(row = 3, column = 1, columnspan = 2)
         self.dropdown = ttk.OptionMenu(self.top, self.option, *self.options)
         self.dropdown.grid(row = 3, column = 2)
-        # place holder for error message text 
+        # place holder for error message text to ensure no shift (with grid layout)
         self.place_holder = Label(self.top).grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 50) 
         self.top.resizable(0,0)
 
@@ -167,7 +172,7 @@ class quantityDialogue():
 
     # disables dropdown and displays erorr msg if limit met
     def check_disable(self):
-        # allows users to edit quantity of foods already added to cart
+        # allows users to edit quantity of foods already added to cart (when not disabled / < 3 items in cart)
         if len(orders) >= 3 and not any(self.food_name in sublist for sublist in orders):
             self.error_msg = ttk.Label(self.top, text = "Limit of 3 types of food items per order", style='rederror.TLabel').grid(row = 2, column = 0, columnspan = 4, padx = 50)
             self.dropdown.configure(state = "disabled")
@@ -184,7 +189,7 @@ class quantityDialogue():
                 item[2] = value
                 item[3] = round(value*float(self.price), 1)
                 if value == 0:
-                    orders.remove(item)
+                    orders.remove(item) # if "zero" quantity selected, item needs to be removed from orders list before order confirmation stage
                 self.top.destroy()
                 return None
 
@@ -192,11 +197,12 @@ class quantityDialogue():
         if value == 0:
             self.top.destroy()
             return None
-        
+
+        # add information of food item to item_order
         item_order.append(self.food_name)
         item_order.append(self.price)
         item_order.append(value)
-        item_order.append(round(value*float(self.price), 1))
+        item_order.append(round(value*float(self.price), 1))# avoid recurring digits from float calculation
         orders.append(item_order)
         self.top.destroy()
         return None
@@ -204,7 +210,7 @@ class quantityDialogue():
     def cancel(self):
         self.top.destroy()
 
-class payment:
+class payment: #Heesu, with help from Destiny and Rachel
     def __init__(self, parent):
         self.top = Toplevel(parent)
         self.top.grab_set()
@@ -226,6 +232,7 @@ class payment:
         ttk.Button(self.top, text = "<paid>", command = self.paid).grid(row = 3, column = 0, columnspan = 2, padx = 50)
         ttk.Button(self.top, text = "Cancel", command = self.cancel).grid(row = 3, column = 2, columnspan = 2, padx = 50)
 
+    # need to close current window to prevent window stacking 
     def paid(self):
         self.top.destroy()
         paymentAccepted(root)
@@ -233,13 +240,14 @@ class payment:
     def cancel(self):
         self.top.destroy()
 
-class orderConfirm:
+class orderConfirm: #Heesu Destiny
     def __init__(self, parent):
 
-        # don't do anything if the user hasn't ordered anything
+        # don't do anything if the user hasn't ordered anything (to prevent paying / printing receipts of $0)
+        #Destiny
         if len(orders) == 0:
             return None
-
+        #Heesu
         self.top = Toplevel(parent)
         self.top.grab_set()
         self.top.attributes("-topmost", True) #stays on top
@@ -247,6 +255,7 @@ class orderConfirm:
         self.top.geometry("350x200+{}+{}".format(str(coord[0]), str(coord[1])))
         self.top.resizable(0,0)
 
+        #Destiny
         # content must be orgainised in frames to keep order table separate from ok/cancel otherwise ok/cancel will shift depending on length of food name (width of columns)
         self.body = ttk.Frame(self.top)
         self.body.grid(sticky=W)
@@ -254,12 +263,16 @@ class orderConfirm:
         self.okcancel.grid()
 
         self.top.title("")
+
+        # table headings 
         title = ttk.Label(self.body, text = "Order Confirmation",style='darkredpopup.TLabel').grid(row = 0, column = 0, pady = 3, sticky = N, padx = 5, columnspan = 4)
         heading_1 = ttk.Label(self.body, text = "Item\n ", style='styleconfirm.TLabel').grid(row = 1, column = 0, sticky = W, padx = 14)
         heading_2 = ttk.Label(self.body, text = "Price\n ", style='styleconfirm.TLabel').grid(row = 1, column = 1, sticky = W, padx = 10)
         heading_3 = ttk.Label(self.body, text = "Quantity\n ", style='styleconfirm.TLabel').grid(row = 1, column = 2, sticky = W, padx = 10)
         heading_4 = ttk.Label(self.body, text = "Total\n ", style='styleconfirm.TLabel').grid(row = 1, column = 3, sticky = W, padx = 10)
 
+        #places information for each food in a grid as usual by extracting information from "orders"
+        
         for rows in range(len(orders)):
             Label(self.body, text = (orders[rows][0])).grid(row = (rows+2), column = 0, sticky = W, padx = 14)
             Label(self.body, text = "${:.2f}".format(float(orders[rows][1]))).grid(row = (rows+2), column = 1, sticky = W, padx = 10)
@@ -271,19 +284,21 @@ class orderConfirm:
         # insert placeholders here based on size of orders list
         for i in range(3 - len(orders)):
             Label(self.body, text = "").grid(row = (7+i))
-
+        #Heesu
         ttk.Button(self.okcancel, text = "Ok", style='blue.TButton', command = self.ok).grid(row = 0, column = 0, padx = 50)
         ttk.Button(self.okcancel, text = "Cancel", command = self.cancel).grid(row = 0, column = 1, padx = 50)
 
+    # close window and trigger next payment window class 
     def ok(self):
         self.top.destroy()
         payment(root)
 
+    # close window and return to enabled menu 
     def cancel(self):
         self.top.destroy()
 
 
-class paymentAccepted:
+class paymentAccepted: #Heesu
     def __init__(self, parent):
         self.top = Toplevel(parent)
         self.top.grab_set()
@@ -301,10 +316,10 @@ class paymentAccepted:
         self.tick_img = Label(self.top, image = self.logo)
         self.tick_img.grid(row = 1, column = 0, padx = 80)
         
-        # 2 second delay
+        # 2 second delay #Destiny
         self.top.after(2000, self.order_number)
 
-    def order_number(self):
+    def order_number(self): #Heesu
         self.paid_msg.destroy()
         self.tick_img.destroy()
 
@@ -315,6 +330,8 @@ class paymentAccepted:
         order_num_txt.grid(row=2,column=0, padx=40,pady=5)
         ttk.Label(self.top, text = "Please pick up your order at the front counter", style='popupfont.TLabel').grid(row=3,column=0, padx=20,pady=5)
 
+        #Destiny
+        # pass information into sales summary and receipt functions 
         for order in orders:
             food_name = order[0]
             quantity = order[2]
@@ -322,14 +339,14 @@ class paymentAccepted:
 
         print_receipt(orders, order_num)
 
-        # 5 second delay
+        # 2 second delay
         self.top.after(2000, self.finish)
 
     def finish(self):
         self.top.destroy()
         restart()
         
-class preorderDialogue:
+class preorderDialogue: #Destiny
     def __init__(self, parent):
 
         self.top = Toplevel(parent)
@@ -338,13 +355,16 @@ class preorderDialogue:
         coord = center_window(350, 200)
         self.top.geometry("350x200+{}+{}".format(str(coord[0]), str(coord[1])))
         self.top.resizable(0,0)
+
+        global preorder_id
+        preorder_id = 0
         
         self.top.title("")
         self.prompt = ttk.Label(self.top, text = "Enter your student ID below",  style='darkredpopup.TLabel').grid(row = 0, column = 0, columnspan = 4, pady = 30, padx = 50)
         
         self.entry_field = Entry(self.top)
         self.entry_field.grid(row = 1, column = 0, columnspan = 4, padx = 50)
-        # place holder for error message text 
+        # place holder for error message text (to avoid shifting in grid layout)
         self.place_holder = Label(self.top).grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 50) 
         ttk.Button(self.top, text = "Ok", command = self.ok, style='blue.TButton').grid(row = 3, column = 0, columnspan = 2, pady = 20, padx = 50)
         ttk.Button(self.top, text = "Cancel", command = self.cancel).grid(row = 3, column = 2, columnspan = 2, pady = 20, padx = 50)
@@ -356,7 +376,7 @@ class preorderDialogue:
         try: 
             preorder_id = int(self.entry_field.get())
 
-            if 15000 <= preorder_id <= 19999:
+            if 15000 <= preorder_id <= 19999: # valid range 
                 start_menu()
                 self.top.destroy()
                 return preorder_id
@@ -365,7 +385,7 @@ class preorderDialogue:
                 self.entry_field.delete(0, 'end') 
                 self.error_msg = ttk.Label(self.top, text = "Please enter a valid student ID",style='rederror.TLabel').grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5)
 
-        except ValueError:
+        except ValueError: # non-integer character entered 
             self.entry_field.delete(0, 'end')
             self.error_msg = ttk.Label(self.top, text = "Please enter a valid student ID", style='rederror.TLabel').grid(row = 2, column = 0, columnspan = 4, pady = 5, padx = 37.5)
 
@@ -375,7 +395,9 @@ class preorderDialogue:
         self.top.destroy()
         return None
 
-
+#------------------------END CLASSES ------------------------
+#------------------------FUNCTIONS --------------------------
+#HEESU 
 def live_time():
     # keeps time ticking
     global time1
@@ -386,6 +408,7 @@ def live_time():
     tick()
 
 # clock code below modified from https://stackoverflow.com/questions/15689667/digital-clock-in-status-bar-in-python-3-and-tkinter
+#HEESU 
 def tick():
     global time1
     # get the current local time from the PC
@@ -397,7 +420,9 @@ def tick():
     # calls itself to the time display as needed
     clock.after(1000, tick)
 
+#Destiny
 def start_screen():
+    # create title and 2 buttons 
     global orders
     orders = []
     global title
@@ -411,8 +436,9 @@ def start_screen():
     start_button.grid(row = 2, padx = 300)
     title.grid(row = 1, padx = 300, pady = 150)
         
-    update_buttons()
+    update_buttons() # ensure buttons are enabled / disabled as expected
 
+#DESTINY 
 def start_menu():
     global page_grid
     page_grid = pageGrid(root)
@@ -421,12 +447,13 @@ def start_menu():
     start_button.grid_forget()
     title.grid_forget()
 
-
+#DESTINY 
 def preorder():
     preorder_dialogue = preorderDialogue(root)
 
-
+#DESTINY 
 def restart():
+    # reset orders, pre order id indicatory, page contents etc and trigger start screen widgets 
     global preorder_id
     orders = []
     preorder_id = 0
@@ -434,6 +461,7 @@ def restart():
     page_grid.body.grid_forget()
     start_screen()
 
+#DESTINY 
 def update_buttons():
     preorder_button.config(state = check_preorder_time())
     preorder_button.update()
@@ -441,23 +469,27 @@ def update_buttons():
     start_button.update()
     root.after(1000, update_buttons)
 
+#DESTINY 
 def check_preorder_time():
-    deadlines = [1225, 1225, 1235, 1225, 1250]
+    deadlines = [2359, 2359, 2359, 2359, 2359, 2359, 2359] # would be changed to actual lunch times if implemented (need this to be at 2359 for testing and running purpsoes)
     deadline = deadlines[datetime.datetime.today().weekday()] # finds day of the week as index
-    if int(time.strftime('%H%M')) >= deadline:
+    if int(time.strftime('%H%M')) >= deadline: # need comparisons to be in same format 
         return "disabled"
     else:
         return "active"
 
+#DESTINY 
 def check_startorder_time():
-    deadlines = [1255, 1255, 1305, 1255, 1245]
+    deadlines = [2359, 2359, 2359, 2359, 2359, 2359, 2359] # would be changed to actual lunch times if implemented (need this to be at 2359 for testing and running purpsoes)
     deadline = deadlines[datetime.datetime.today().weekday()] # finds day of the week as index
-    if int(time.strftime('%H%M')) >= deadline:
+    if int(time.strftime('%H%M')) >= deadline: # need comparisons to be in same format 
         return "disabled"
     else:
         return "active"
-    
+
+#DESTINY
 def find_order_num():
+    # generate next order number (unique for each day/run of program) - add pre order ID if applicable
     order_num = ""
     global order_count
     order_count += 1
@@ -467,13 +499,16 @@ def find_order_num():
     else: 
         return str(order_count)
 
+#DESTINY 
 def find_total():
-    # calculate total for order
+    # calculate total price for order
     total = 0
     for i in range(len(orders)):
         total += orders[i][3]
     return total
-        
+
+
+#DESTINY         
 def center_window(window_width, window_height):
 
     coord = []
@@ -483,6 +518,7 @@ def center_window(window_width, window_height):
     coord.append(pos_down)
     return coord
 
+#RACHEL 
 # updates the sale count on csv file
 def update_sales_count(food_name, quantity):
     with open('sales_summary.csv', 'r') as sales_read:
@@ -497,11 +533,13 @@ def update_sales_count(food_name, quantity):
         writer = csv.writer(sales_write)
         writer.writerows(output)
 
+#DESTINY 
 def print_receipt(orders, order_num):
     # set up file and insert headings
     receipts = open("receipts.txt","a")
     receipts.write(str("*****Order Number: {}*****\n \n".format(order_num)))
     contents = []
+    # change to correct / same length so each entry has a fixed cell size 
     headings = [change_length("Item", 25), change_length("Price ($)", 15), change_length("Quantity", 14), change_length("Total ($)", 11)]
     contents.append(headings)
     contents.append("")
@@ -516,7 +554,8 @@ def print_receipt(orders, order_num):
         row.append(change_length("{}".format(item[2]), 14))
         row.append(change_length("{:.2f}".format(item[3]), 11))
         contents.append(row)
-        
+
+    # add everything to txt file 
     for i in contents:
         for x in i:
             receipts.write(str(x)+"")
@@ -525,18 +564,21 @@ def print_receipt(orders, order_num):
 
     receipts.close()
 
+#DESTINY 
 def change_length(cell_name, character_limit):
 
     cell_name += (" " * (character_limit-len(cell_name)))  # to fill in the extra spaces 
     return cell_name
-
+#-----------------------------------END FUNCTIONS-----------------------------------
+#-----------------------------------MAIN-----------------------------------
 if __name__ == "__main__":
-
+#DESTINY 
     root = Tk()
     root.overrideredirect(1) # clears min/max buttons, close buttons
     coord = center_window(1000, 650)
-    root.geometry("1000x650+{}+{}".format(str(coord[0]), str(coord[1]-20))) 
-
+    root.geometry("1000x650+{}+{}".format(str(coord[0]), str(coord[1]-20)))
+    
+#RACHEL 
     # Styling
     ttk.Style().configure("TButton", justify = "center")
     ttk.Style().configure("TLabel", justify = "center", font=('verdana', 10))
@@ -553,6 +595,7 @@ if __name__ == "__main__":
     ttk.Style().configure('popupfont.TLabel', font=('verdana', 10))
     root.configure(background="white")
 
+#DESTINY 
     #opens menu file 
     data = list(csv.reader(open('menu.csv')))
     #passes in heading and rest of rows and collects instances into list
@@ -569,7 +612,7 @@ if __name__ == "__main__":
         food_names.append(lines[0])
     food_names.remove(food_names[0]) # removes heading
 
-    # creates list of 0s
+    # creates list of 0s for sales summary file 
     zero = []
     for i in range(len(food_names)):
         zero.append("0")
@@ -579,8 +622,6 @@ if __name__ == "__main__":
     # places start screen contents
     global order_count
     order_count = 0
-    global preorder_id
-    preorder_id = 0
 
     # clear contents from previous day
     receipts = open("receipts.txt","w")
